@@ -170,9 +170,3 @@ extern "C" void setup(ModInfo &info)
 
     getLogger().info("Completed setup!");
 }
-
-/* Testing */
-extern "C" void load()
-{
-    BSEvents::Init();
-}

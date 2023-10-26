@@ -2,8 +2,8 @@
 
 Adds various events for mods to subscribe to
 
-Use `qpm-rust s build` to build
-Same goes for `qpm-rust s copy` and `qpm-rust s qmod`
+Use `qpm s build` to build
+Same goes for `qpm s copy` and `qpm s qmod`
 
 ## Credits
 
