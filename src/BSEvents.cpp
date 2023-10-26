@@ -11,11 +11,11 @@
 
 using namespace GlobalNamespace;
 
-System::Action_2<StandardLevelScenesTransitionSetupDataSO*, LevelCompletionResults*>* standardLevelScenesDelegate;
-System::Action_2<MultiplayerLevelScenesTransitionSetupDataSO*, MultiplayerResultsData*>* multiplayerLevelScenesDelegate;
-System::Action_2<MultiplayerLevelScenesTransitionSetupDataSO*, GlobalNamespace::DisconnectedReason>* multiplayerDisconnectedDelegate;
-System::Action_2<MissionLevelScenesTransitionSetupDataSO*, MissionCompletionResults*>* missionLevelScenesDelegate;
-System::Action_2<TutorialScenesTransitionSetupDataSO *, TutorialScenesTransitionSetupDataSO::TutorialEndStateType>* tutorialLevelScenesDelegate;
+SafePtr<System::Action_2<StandardLevelScenesTransitionSetupDataSO*, LevelCompletionResults*>> standardLevelScenesDelegate;
+SafePtr<System::Action_2<MultiplayerLevelScenesTransitionSetupDataSO*, MultiplayerResultsData*>> multiplayerLevelScenesDelegate;
+SafePtr<System::Action_2<MultiplayerLevelScenesTransitionSetupDataSO*, GlobalNamespace::DisconnectedReason>> multiplayerDisconnectedDelegate;
+SafePtr<System::Action_2<MissionLevelScenesTransitionSetupDataSO*, MissionCompletionResults*>> missionLevelScenesDelegate;
+SafePtr<System::Action_2<TutorialScenesTransitionSetupDataSO *, TutorialScenesTransitionSetupDataSO::TutorialEndStateType>> tutorialLevelScenesDelegate;
 
 std::optional<BSEvents::LevelType> currentLevelType = std::nullopt;
 
@@ -32,9 +32,11 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
     StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects, startPaused, beatmapDataCache);
     currentLevelType = BSEvents::LevelType::SoloParty;
 
-    self->remove_didFinishEvent(standardLevelScenesDelegate);
-    standardLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerLevelFinishedEvent));
-    self->add_didFinishEvent(standardLevelScenesDelegate);
+    if(standardLevelScenesDelegate.isHandleValid())
+        self->remove_didFinishEvent(standardLevelScenesDelegate.ptr());
+    else
+        standardLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerLevelFinishedEvent));
+    self->add_didFinishEvent(standardLevelScenesDelegate.ptr());
 }
 
 MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &MultiplayerLevelScenesTransitionSetupDataSO::Init, void, MultiplayerLevelScenesTransitionSetupDataSO* self, StringW gameMode, ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::GlobalNamespace::BeatmapDifficulty beatmapDifficulty, ::GlobalNamespace::BeatmapCharacteristicSO* beatmapCharacteristic, ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, ::GlobalNamespace::ColorScheme* overrideColorScheme, ::GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::GlobalNamespace::PracticeSettings* practiceSettings, bool useTestNoteCutSoundEffects)
@@ -42,14 +44,18 @@ MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &MultiplayerLe
     MultiplayerLevelScenesTransitionSetupDataSO_Init(self, gameMode, previewBeatmapLevel, beatmapDifficulty, beatmapCharacteristic, difficultyBeatmap, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, useTestNoteCutSoundEffects);
     currentLevelType = BSEvents::LevelType::Multiplayer;
     
-    self->remove_didFinishEvent(multiplayerLevelScenesDelegate);
-    multiplayerLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function([](MultiplayerLevelScenesTransitionSetupDataSO* scenesTransitionSetupData, MultiplayerResultsData* resultsData)
-    { BSEvents::TriggerMultiplayerLevelDidFinish(scenesTransitionSetupData, resultsData->localPlayerResultData->multiplayerLevelCompletionResults->levelCompletionResults, resultsData->otherPlayersData); }));
-    self->add_didFinishEvent(multiplayerLevelScenesDelegate);
+    if(multiplayerLevelScenesDelegate.isHandleValid())
+        self->remove_didFinishEvent(multiplayerLevelScenesDelegate.ptr());
+    else
+        multiplayerLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function([](MultiplayerLevelScenesTransitionSetupDataSO* scenesTransitionSetupData, MultiplayerResultsData* resultsData)
+        { BSEvents::TriggerMultiplayerLevelDidFinish(scenesTransitionSetupData, resultsData->localPlayerResultData->multiplayerLevelCompletionResults->levelCompletionResults, resultsData->otherPlayersData); }));
+    self->add_didFinishEvent(multiplayerLevelScenesDelegate.ptr());
 
-    self->remove_didDisconnectEvent(multiplayerDisconnectedDelegate);
-    multiplayerDisconnectedDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerMultiplayerDidDisconnect));
-    self->add_didDisconnectEvent(multiplayerDisconnectedDelegate);
+    if(multiplayerDisconnectedDelegate.isHandleValid())
+        self->remove_didDisconnectEvent(multiplayerDisconnectedDelegate.ptr());
+    else
+        multiplayerDisconnectedDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerMultiplayerDidDisconnect));
+    self->add_didDisconnectEvent(multiplayerDisconnectedDelegate.ptr());
 }
 
 MAKE_HOOK_MATCH(MissionLevelScenesTransitionSetupDataSO_Init, &MissionLevelScenesTransitionSetupDataSO::Init, void, MissionLevelScenesTransitionSetupDataSO* self, StringW missionId, ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::ArrayW<::GlobalNamespace::MissionObjective*> missionObjectives, ::GlobalNamespace::ColorScheme* overrideColorScheme, ::GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::StringW backButtonText)
@@ -57,9 +63,11 @@ MAKE_HOOK_MATCH(MissionLevelScenesTransitionSetupDataSO_Init, &MissionLevelScene
     MissionLevelScenesTransitionSetupDataSO_Init(self, missionId, difficultyBeatmap, previewBeatmapLevel, missionObjectives, overrideColorScheme, gameplayModifiers, playerSpecificSettings, backButtonText);
     currentLevelType = BSEvents::LevelType::Campaign;
     
-    self->remove_didFinishEvent(missionLevelScenesDelegate);
-    missionLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerMissionLevelDidFinish));
-    self->add_didFinishEvent(missionLevelScenesDelegate);
+    if(missionLevelScenesDelegate.isHandleValid())
+        self->remove_didFinishEvent(missionLevelScenesDelegate.ptr());
+    else
+        missionLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerMissionLevelDidFinish));
+    self->add_didFinishEvent(missionLevelScenesDelegate.ptr());
 }
 
 MAKE_HOOK_MATCH(TutorialScenesTransitionSetupDataSO_Init, &TutorialScenesTransitionSetupDataSO::Init, void, TutorialScenesTransitionSetupDataSO* self, GlobalNamespace::PlayerSpecificSettings *playerSpecificSettings)
@@ -67,21 +75,19 @@ MAKE_HOOK_MATCH(TutorialScenesTransitionSetupDataSO_Init, &TutorialScenesTransit
     TutorialScenesTransitionSetupDataSO_Init(self, playerSpecificSettings);
     currentLevelType = BSEvents::LevelType::Tutorial;
 
-    self->remove_didFinishEvent(tutorialLevelScenesDelegate);
-    tutorialLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerTutorialLevelDidFinish));
-    self->add_didFinishEvent(tutorialLevelScenesDelegate);
+    if(tutorialLevelScenesDelegate.isHandleValid())
+        self->remove_didFinishEvent(tutorialLevelScenesDelegate.ptr());
+    else
+        tutorialLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function(BSEvents::TriggerTutorialLevelDidFinish));
+    self->add_didFinishEvent(tutorialLevelScenesDelegate.ptr());
 }
 
 MAKE_HOOK_MATCH(MenuTransitionsHelper_RestartGame, &MenuTransitionsHelper::RestartGame, void, MenuTransitionsHelper* self, System::Action_1<Zenject::DiContainer*>* action)
 {
     MenuTransitionsHelper_RestartGame(self, action);
 
-    getLogger().info("Game soft restarted, cleaning up delegate pointers...");
-
     BSEvents::OnSoftRestart();
     currentLevelType = std::nullopt;
-
-    getLogger().info("Pointers cleared!");
 }
 
 namespace BSEvents
@@ -165,6 +171,7 @@ extern "C" void setup(ModInfo &info)
     getLogger().info("Completed setup!");
 }
 
+/* Testing */
 extern "C" void load()
 {
     BSEvents::Init();

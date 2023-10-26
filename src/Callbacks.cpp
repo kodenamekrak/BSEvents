@@ -22,10 +22,13 @@
 
 GlobalNamespace::GameScenesManager* gameScenesManager;
 
-System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO *, Zenject::DiContainer *>* gameSceneLoadedDelegate;
-System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO *, Zenject::DiContainer *>* menuSceneLoadedDelegate;
-System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO *, Zenject::DiContainer *>* menuSceneLoadedFreshDelegate;
-System::Action_2<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO *, GlobalNamespace::LevelCompletionResults *>* transitionSetupDidFinishDelegate;
+using SceneLoadedAction = System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO *, Zenject::DiContainer *>;
+using SceneTransitionFinishedAction = System::Action_2<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO *, GlobalNamespace::LevelCompletionResults *>;
+
+SafePtr<SceneLoadedAction> gameSceneLoadedDelegate;
+SafePtr<SceneLoadedAction> menuSceneLoadedDelegate;
+SafePtr<SceneLoadedAction> menuSceneLoadedFreshDelegate;
+SafePtr<SceneTransitionFinishedAction> transitionSetupDidFinishDelegate;
 
 bool lastMainSceneWasNotMenu;
 
@@ -42,6 +45,7 @@ namespace BSEvents {
     void OnSoftRestart()
     {
         INVOKE(softRestart);
+        gameScenesManager = nullptr;
     }
 
     void TransitionSetupDidFinish(GlobalNamespace::StandardLevelScenesTransitionSetupDataSO* setupData, GlobalNamespace::LevelCompletionResults* results)
@@ -70,7 +74,8 @@ namespace BSEvents {
     void OnGameSceneLoaded(GlobalNamespace::ScenesTransitionSetupDataSO * setupData, Zenject::DiContainer * container)
     {
         auto gameScenesManager2 = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().FirstOrDefault();
-        gameScenesManager->remove_transitionDidFinishEvent(gameSceneLoadedDelegate);
+        if(gameSceneLoadedDelegate.isHandleValid())
+            gameScenesManager->remove_transitionDidFinishEvent(gameSceneLoadedDelegate.ptr());
 
         auto pauseController = container->TryResolve<GlobalNamespace::PauseController*>();
         if(pauseController)
@@ -129,16 +134,18 @@ namespace BSEvents {
         auto transitionData = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*>().FirstOrDefault();
         if(transitionData)
         {
-            transitionData->remove_didFinishEvent(transitionSetupDidFinishDelegate);
-            transitionSetupDidFinishDelegate = custom_types::MakeDelegate<System::Action_2<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*>*>(std::function(TransitionSetupDidFinish));
-            transitionData->add_didFinishEvent(transitionSetupDidFinishDelegate);
+            if(transitionSetupDidFinishDelegate.isHandleValid())
+                transitionData->remove_didFinishEvent(transitionSetupDidFinishDelegate.ptr());
+            else
+                transitionSetupDidFinishDelegate = DelegateHelper::CreateDelegate(std::function(TransitionSetupDidFinish));
+            transitionData->add_didFinishEvent(transitionSetupDidFinishDelegate.ptr());
         }
         INVOKE(gameSceneLoaded);
     }
 
     void OnMenuSceneLoadedFresh(GlobalNamespace::ScenesTransitionSetupDataSO * setupData, Zenject::DiContainer * container)
     {
-        gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedFreshDelegate);
+        gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedFreshDelegate.ptr());
 
         auto levelDetailViewController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::StandardLevelDetailViewController*>().FirstOrDefault();
         levelDetailViewController->add_didChangeDifficultyBeatmapEvent(DelegateHelper::CreateDelegate(std::function([](GlobalNamespace::StandardLevelDetailViewController* viewController, GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap)
@@ -162,7 +169,7 @@ namespace BSEvents {
 
     void OnMenuSceneLoaded(GlobalNamespace::ScenesTransitionSetupDataSO* setupData, Zenject::DiContainer* container)
     {
-        gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedDelegate);
+        gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedDelegate.ptr());
         INVOKE(menuSceneLoaded);
     }
 
@@ -175,29 +182,35 @@ namespace BSEvents {
             gameScenesManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().FirstOrDefault();
             if(gameScenesManager)
             {
-                gameScenesManager->remove_transitionDidFinishEvent(gameSceneLoadedDelegate);
-                gameSceneLoadedDelegate = custom_types::MakeDelegate<System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO*, Zenject::DiContainer*>*>(std::function(OnGameSceneLoaded));
-                gameScenesManager->add_transitionDidFinishEvent(gameSceneLoadedDelegate);
+                if(gameSceneLoadedDelegate.isHandleValid())
+                    gameScenesManager->remove_transitionDidFinishEvent(gameSceneLoadedDelegate.ptr());
+                else
+                    gameSceneLoadedDelegate = DelegateHelper::CreateDelegate(std::function(OnGameSceneLoaded));
+                gameScenesManager->add_transitionDidFinishEvent(gameSceneLoadedDelegate.ptr());
             }
         }
         else if(next.get_name() == "MainMenu")
         {
             gameScenesManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().FirstOrDefault();
             INVOKE(menuSceneActive);
-
-            if(gameScenesManager)
+ 
+            if(gameScenesManager && gameScenesManager->m_CachedPtr.m_value)
             {
                 if(prev.get_name() == "EmptyTransition" && !lastMainSceneWasNotMenu)
                 {
-                    gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedFreshDelegate);
-                    menuSceneLoadedFreshDelegate = custom_types::MakeDelegate<System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO*, Zenject::DiContainer*>*>(std::function(OnMenuSceneLoadedFresh));
-                    gameScenesManager->add_transitionDidFinishEvent(menuSceneLoadedFreshDelegate);
+                    if(menuSceneLoadedFreshDelegate.isHandleValid())
+                        gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedFreshDelegate.ptr());
+                    else
+                        menuSceneLoadedFreshDelegate = DelegateHelper::CreateDelegate(std::function(OnMenuSceneLoadedFresh));
+                    gameScenesManager->add_transitionDidFinishEvent(menuSceneLoadedFreshDelegate.ptr());
                 }
                 else
                 {
-                    gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedDelegate);
-                    menuSceneLoadedDelegate = custom_types::MakeDelegate<System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO*, Zenject::DiContainer*>*>(std::function(OnMenuSceneLoaded));
-                    gameScenesManager->add_transitionDidFinishEvent(menuSceneLoadedDelegate);
+                    if(menuSceneLoadedDelegate.isHandleValid())
+                       gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedDelegate.ptr());
+                    else
+                        menuSceneLoadedDelegate = DelegateHelper::CreateDelegate(std::function(OnMenuSceneLoaded));
+                    gameScenesManager->add_transitionDidFinishEvent(menuSceneLoadedDelegate.ptr());
                 }
             }
             lastMainSceneWasNotMenu = false;
