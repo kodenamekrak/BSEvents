@@ -11,15 +11,15 @@
 
 using namespace GlobalNamespace;
 
-SafePtr<System::Action_2<StandardLevelScenesTransitionSetupDataSO*, LevelCompletionResults*>> standardLevelScenesDelegate;
-SafePtr<System::Action_2<MultiplayerLevelScenesTransitionSetupDataSO*, MultiplayerResultsData*>> multiplayerLevelScenesDelegate;
-SafePtr<System::Action_2<MultiplayerLevelScenesTransitionSetupDataSO*, GlobalNamespace::DisconnectedReason>> multiplayerDisconnectedDelegate;
-SafePtr<System::Action_2<MissionLevelScenesTransitionSetupDataSO*, MissionCompletionResults*>> missionLevelScenesDelegate;
-SafePtr<System::Action_2<TutorialScenesTransitionSetupDataSO *, TutorialScenesTransitionSetupDataSO::TutorialEndStateType>> tutorialLevelScenesDelegate;
+SafePtr<System::Action_2<UnityW<StandardLevelScenesTransitionSetupDataSO>, LevelCompletionResults*>> standardLevelScenesDelegate;
+SafePtr<System::Action_2<UnityW<MultiplayerLevelScenesTransitionSetupDataSO>, MultiplayerResultsData*>> multiplayerLevelScenesDelegate;
+SafePtr<System::Action_2<UnityW<MultiplayerLevelScenesTransitionSetupDataSO>, GlobalNamespace::DisconnectedReason>> multiplayerDisconnectedDelegate;
+SafePtr<System::Action_2<UnityW<MissionLevelScenesTransitionSetupDataSO>, MissionCompletionResults*>> missionLevelScenesDelegate;
+SafePtr<System::Action_2<UnityW<TutorialScenesTransitionSetupDataSO>, TutorialScenesTransitionSetupDataSO::TutorialEndStateType>> tutorialLevelScenesDelegate;
 
 std::optional<BSEvents::LevelType> currentLevelType = std::nullopt;
 
-static ModInfo modInfo;
+static modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
 MAKE_HOOK_MATCH(SceneManager_Internal_ActiveSceneChanged, &UnityEngine::SceneManagement::SceneManager::Internal_ActiveSceneChanged, void, UnityEngine::SceneManagement::Scene prev, UnityEngine::SceneManagement::Scene next)
 {
@@ -27,9 +27,9 @@ MAKE_HOOK_MATCH(SceneManager_Internal_ActiveSceneChanged, &UnityEngine::SceneMan
     BSEvents::OnSceneManagerActiveSceneChanged(prev, next);
 }
 
-MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void, StandardLevelScenesTransitionSetupDataSO* self, StringW gameMode, ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::GlobalNamespace::OverrideEnvironmentSettings* overrideEnvironmentSettings, ::GlobalNamespace::ColorScheme* overrideColorScheme, ::GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::GlobalNamespace::PracticeSettings* practiceSettings, ::StringW backButtonText, bool useTestNoteCutSoundEffects, bool startPaused, ::GlobalNamespace::BeatmapDataCache* beatmapDataCache)
+MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void, StandardLevelScenesTransitionSetupDataSO* self, StringW gameMode, ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::GlobalNamespace::OverrideEnvironmentSettings* overrideEnvironmentSettings, ::GlobalNamespace::ColorScheme* overrideColorScheme, GlobalNamespace::ColorScheme* beatmapOverrideColorScheme, ::GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::GlobalNamespace::PracticeSettings* practiceSettings, ::StringW backButtonText, bool useTestNoteCutSoundEffects, bool startPaused, ::GlobalNamespace::BeatmapDataCache* beatmapDataCache, System::Nullable_1<::GlobalNamespace::RecordingToolManager::SetupData> recordingToolData)
 {
-    StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects, startPaused, beatmapDataCache);
+    StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, beatmapOverrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects, startPaused, beatmapDataCache, recordingToolData);
     currentLevelType = BSEvents::LevelType::SoloParty;
 
     if(standardLevelScenesDelegate.isHandleValid())
@@ -47,7 +47,7 @@ MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &MultiplayerLe
     if(multiplayerLevelScenesDelegate.isHandleValid())
         self->remove_didFinishEvent(multiplayerLevelScenesDelegate.ptr());
     else
-        multiplayerLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function([](MultiplayerLevelScenesTransitionSetupDataSO* scenesTransitionSetupData, MultiplayerResultsData* resultsData)
+        multiplayerLevelScenesDelegate = DelegateHelper::CreateDelegate(std::function([](UnityW<MultiplayerLevelScenesTransitionSetupDataSO> scenesTransitionSetupData, MultiplayerResultsData* resultsData)
         { BSEvents::TriggerMultiplayerLevelDidFinish(scenesTransitionSetupData, resultsData->localPlayerResultData->multiplayerLevelCompletionResults->levelCompletionResults, resultsData->otherPlayersData); }));
     self->add_didFinishEvent(multiplayerLevelScenesDelegate.ptr());
 
@@ -160,13 +160,4 @@ Logger &getLogger()
 {
     static Logger *logger = new Logger(modInfo, {false, true});
     return *logger;
-}
-
-extern "C" void setup(ModInfo &info)
-{
-    info.id = MOD_ID;
-    info.version = VERSION;
-    modInfo = info;
-
-    getLogger().info("Completed setup!");
 }

@@ -9,7 +9,6 @@
 #include "GlobalNamespace/BeatmapCharacteristicSegmentedControlController.hpp"
 #include "GlobalNamespace/PauseController.hpp"
 #include "GlobalNamespace/BeatmapObjectManager.hpp"
-#include "GlobalNamespace/BeatmapObjectManager_NoteWasCutDelegate.hpp"
 #include "GlobalNamespace/ComboController.hpp"
 #include "GlobalNamespace/ScoreController.hpp"
 #include "GlobalNamespace/ObstacleSaberSparkleEffectManager.hpp"
@@ -22,8 +21,8 @@
 
 GlobalNamespace::GameScenesManager* gameScenesManager;
 
-using SceneLoadedAction = System::Action_2<GlobalNamespace::ScenesTransitionSetupDataSO *, Zenject::DiContainer *>;
-using SceneTransitionFinishedAction = System::Action_2<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO *, GlobalNamespace::LevelCompletionResults *>;
+using SceneLoadedAction = System::Action_2<UnityW<GlobalNamespace::ScenesTransitionSetupDataSO>, Zenject::DiContainer *>;
+using SceneTransitionFinishedAction = System::Action_2<UnityW<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO>, GlobalNamespace::LevelCompletionResults *>;
 
 SafePtr<SceneLoadedAction> gameSceneLoadedDelegate;
 SafePtr<SceneLoadedAction> menuSceneLoadedDelegate;
@@ -48,7 +47,7 @@ namespace BSEvents {
         gameScenesManager = nullptr;
     }
 
-    void TransitionSetupDidFinish(GlobalNamespace::StandardLevelScenesTransitionSetupDataSO* setupData, GlobalNamespace::LevelCompletionResults* results)
+    void TransitionSetupDidFinish(UnityW<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO> setupData, GlobalNamespace::LevelCompletionResults* results)
     {
         switch (results->levelEndStateType)
         {
@@ -58,7 +57,6 @@ namespace BSEvents {
             case GlobalNamespace::LevelCompletionResults::LevelEndStateType::Failed:
                 INVOKE(levelFailed, setupData, results);
                 break;
-
         }
         switch(results->levelEndAction)
         {
@@ -71,9 +69,9 @@ namespace BSEvents {
         }
     }
 
-    void OnGameSceneLoaded(GlobalNamespace::ScenesTransitionSetupDataSO * setupData, Zenject::DiContainer * container)
+    void OnGameSceneLoaded(UnityW<GlobalNamespace::ScenesTransitionSetupDataSO> setupData, Zenject::DiContainer* container)
     {
-        auto gameScenesManager2 = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().FirstOrDefault();
+        auto gameScenesManager2 = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().front_or_default();
         if(gameSceneLoadedDelegate.isHandleValid())
             gameScenesManager->remove_transitionDidFinishEvent(gameSceneLoadedDelegate.ptr());
 
@@ -87,9 +85,9 @@ namespace BSEvents {
         auto beatmapObjectManager = container->TryResolve<GlobalNamespace::BeatmapObjectManager*>();
         if(beatmapObjectManager)
         {
-            beatmapObjectManager->add_noteWasCutEvent(custom_types::MakeDelegate<GlobalNamespace::BeatmapObjectManager::NoteWasCutDelegate*>(std::function([](GlobalNamespace::NoteController* controller, GlobalNamespace::NoteCutInfo* cutInfo)
+            beatmapObjectManager->add_noteWasCutEvent(custom_types::MakeDelegate<GlobalNamespace::BeatmapObjectManager::NoteWasCutDelegate*>(std::function([](UnityW<GlobalNamespace::NoteController> controller, GlobalNamespace::NoteCutInfo* cutInfo)
             { INVOKE(noteWasCut, controller, cutInfo); })));
-            beatmapObjectManager->add_noteWasMissedEvent(DelegateHelper::CreateDelegate(std::function([](GlobalNamespace::NoteController* controller)
+            beatmapObjectManager->add_noteWasMissedEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::NoteController> controller)
             { INVOKE(noteWasMissed, controller); })));
         }
         
@@ -115,7 +113,7 @@ namespace BSEvents {
             { INVOKE(scoreDidChange, multipliedScore, modifiedScore); })));
         }
 
-        auto sparkleManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::ObstacleSaberSparkleEffectManager*>().FirstOrDefault();
+        auto sparkleManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::ObstacleSaberSparkleEffectManager*>().front_or_default();
         if(sparkleManager)
         {
             sparkleManager->add_sparkleEffectDidStartEvent(DelegateHelper::CreateDelegate(std::function([](GlobalNamespace::SaberType saberType)
@@ -131,7 +129,7 @@ namespace BSEvents {
             gameEnergyCounter->add_gameEnergyDidChangeEvent(DelegateHelper::CreateDelegate(std::function([](float energy){ INVOKE(energyDidChange, energy); })));
         }
 
-        auto transitionData = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*>().FirstOrDefault();
+        auto transitionData = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*>().front_or_default();
         if(transitionData)
         {
             if(transitionSetupDidFinishDelegate.isHandleValid())
@@ -143,31 +141,31 @@ namespace BSEvents {
         INVOKE(gameSceneLoaded);
     }
 
-    void OnMenuSceneLoadedFresh(GlobalNamespace::ScenesTransitionSetupDataSO * setupData, Zenject::DiContainer * container)
+    void OnMenuSceneLoadedFresh(UnityW<GlobalNamespace::ScenesTransitionSetupDataSO> setupData, Zenject::DiContainer* container)
     {
         gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedFreshDelegate.ptr());
 
-        auto levelDetailViewController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::StandardLevelDetailViewController*>().FirstOrDefault();
-        levelDetailViewController->add_didChangeDifficultyBeatmapEvent(DelegateHelper::CreateDelegate(std::function([](GlobalNamespace::StandardLevelDetailViewController* viewController, GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap)
+        auto levelDetailViewController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::StandardLevelDetailViewController*>().front_or_default();
+        levelDetailViewController->add_didChangeDifficultyBeatmapEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::StandardLevelDetailViewController> viewController, GlobalNamespace::IDifficultyBeatmap*difficultyBeatmap)
         { INVOKE(difficultySelected, viewController, difficultyBeatmap); })));
 
-        auto segmentedControlController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapCharacteristicSegmentedControlController*>().FirstOrDefault();
-        segmentedControlController->add_didSelectBeatmapCharacteristicEvent(DelegateHelper::CreateDelegate(std::function([](GlobalNamespace::BeatmapCharacteristicSegmentedControlController* controller, GlobalNamespace::BeatmapCharacteristicSO* characteristic)
+        auto segmentedControlController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapCharacteristicSegmentedControlController*>().front_or_default();
+        segmentedControlController->add_didSelectBeatmapCharacteristicEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::BeatmapCharacteristicSegmentedControlController> controller, UnityW<GlobalNamespace::BeatmapCharacteristicSO> characteristic)
         { INVOKE(characteristicSelected, controller, characteristic); })));
 
-        auto navigationController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::LevelSelectionNavigationController*>().FirstOrDefault();
-        navigationController->add_didSelectLevelPackEvent(DelegateHelper::CreateDelegate(std::function([](GlobalNamespace::LevelSelectionNavigationController * controller, GlobalNamespace::IBeatmapLevelPack * levelPack)
+        auto navigationController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::LevelSelectionNavigationController*>().front_or_default();
+        navigationController->add_didSelectLevelPackEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::LevelSelectionNavigationController> controller, GlobalNamespace::IBeatmapLevelPack * levelPack)
         { INVOKE(levelPackSelected, controller, levelPack); })));
 
-        auto collectionViewController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::LevelCollectionViewController*>().FirstOrDefault();
-        collectionViewController->add_didSelectLevelEvent(DelegateHelper::CreateDelegate(std::function([](GlobalNamespace::LevelCollectionViewController* controller, GlobalNamespace::IPreviewBeatmapLevel* level)
+        auto collectionViewController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::LevelCollectionViewController*>().front_or_default();
+        collectionViewController->add_didSelectLevelEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::LevelCollectionViewController> controller, GlobalNamespace::IPreviewBeatmapLevel* level)
         { INVOKE(levelSelected, controller, level); })));
 
         INVOKE(earlyMenuSceneLoadedFresh, setupData);
         INVOKE(lateMenuSceneLoadedFresh, setupData);
     }
 
-    void OnMenuSceneLoaded(GlobalNamespace::ScenesTransitionSetupDataSO* setupData, Zenject::DiContainer* container)
+    void OnMenuSceneLoaded(UnityW<GlobalNamespace::ScenesTransitionSetupDataSO> setupData, Zenject::DiContainer* container)
     {
         gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedDelegate.ptr());
         INVOKE(menuSceneLoaded);
@@ -179,7 +177,7 @@ namespace BSEvents {
         {
             INVOKE(gameSceneActive);
 
-            gameScenesManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().FirstOrDefault();
+            gameScenesManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().front_or_default();
             if(gameScenesManager)
             {
                 if(gameSceneLoadedDelegate.isHandleValid())
@@ -191,10 +189,10 @@ namespace BSEvents {
         }
         else if(next.get_name() == "MainMenu")
         {
-            gameScenesManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().FirstOrDefault();
+            gameScenesManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().front_or_default();
             INVOKE(menuSceneActive);
  
-            if(gameScenesManager && gameScenesManager->m_CachedPtr.m_value)
+            if(gameScenesManager && gameScenesManager->m_CachedPtr)
             {
                 if(prev.get_name() == "EmptyTransition" && !lastMainSceneWasNotMenu)
                 {
@@ -219,31 +217,31 @@ namespace BSEvents {
             lastMainSceneWasNotMenu = true;
     }
 
-    void TriggerLevelFinishedEvent(GlobalNamespace::StandardLevelScenesTransitionSetupDataSO* setupData, GlobalNamespace::LevelCompletionResults* completionResults)
+    void TriggerLevelFinishedEvent(UnityW<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO> setupData, GlobalNamespace::LevelCompletionResults* completionResults)
     {
         BSEvents::SoloLevelFinishedWithResultsEventArgs arg(setupData, completionResults);
         INVOKE(levelFinished, arg);
     }
 
-    void TriggerMultiplayerLevelDidFinish(GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO* setupData, GlobalNamespace::LevelCompletionResults* completionResults, System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::MultiplayerPlayerResultsData*>* otherPlayerResults)
+    void TriggerMultiplayerLevelDidFinish(UnityW<GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO> setupData, GlobalNamespace::LevelCompletionResults* completionResults, System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::MultiplayerPlayerResultsData*>* otherPlayerResults)
     {
         BSEvents::MultiplayerLevelFinishedEventArgs arg(setupData, completionResults, otherPlayerResults);
         INVOKE(levelFinished, arg);
     }
 
-    void TriggerMissionLevelDidFinish(GlobalNamespace::MissionLevelScenesTransitionSetupDataSO* setupData, GlobalNamespace::MissionCompletionResults* missionCompletionResults)
+    void TriggerMissionLevelDidFinish(UnityW<GlobalNamespace::MissionLevelScenesTransitionSetupDataSO> setupData, GlobalNamespace::MissionCompletionResults* missionCompletionResults)
     {
         BSEvents::CampaignLevelFinishedEventArgs arg(setupData, missionCompletionResults);
         INVOKE(levelFinished, arg);
     }
 
-    void TriggerTutorialLevelDidFinish(GlobalNamespace::TutorialScenesTransitionSetupDataSO* setupData, GlobalNamespace::TutorialScenesTransitionSetupDataSO::TutorialEndStateType endState)
+    void TriggerTutorialLevelDidFinish(UnityW<GlobalNamespace::TutorialScenesTransitionSetupDataSO> setupData, GlobalNamespace::TutorialScenesTransitionSetupDataSO::TutorialEndStateType endState)
     {
         BSEvents::TutorialLevelFinishedEventArgs arg(setupData, endState);
         INVOKE(levelFinished, arg);
     }
 
-    void TriggerMultiplayerDidDisconnect(GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO* setupData, GlobalNamespace::DisconnectedReason disconnectedReason)
+    void TriggerMultiplayerDidDisconnect(UnityW<GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO> setupData, GlobalNamespace::DisconnectedReason disconnectedReason)
     {
         INVOKE(multiplayerDidDisconnect, setupData, disconnectedReason);
     }

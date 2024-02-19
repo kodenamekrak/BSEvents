@@ -10,6 +10,7 @@
 #include "GlobalNamespace/MissionLevelScenesTransitionSetupDataSO.hpp"
 #include "GlobalNamespace/TutorialScenesTransitionSetupDataSO.hpp"
 
+#include "System/Collections/Generic/IReadOnlyCollection_1.hpp"
 #include "System/Collections/Generic/IReadOnlyList_1.hpp"
 
 namespace BSEvents {
@@ -51,7 +52,8 @@ namespace BSEvents {
         GlobalNamespace::LevelCompletionResults* GetPlayerResults(StringW playerId)
         {
             GlobalNamespace::LevelCompletionResults* results;
-            for(int i = 0; i < otherPlayerCompletionResults->i_IReadOnlyCollection_1_T()->get_Count(); i++)
+
+            for(int i = 0; i < otherPlayerCompletionResults->i___System__Collections__Generic__IReadOnlyCollection_1_T_()->get_Count(); i++)
             {
                 auto v = otherPlayerCompletionResults->get_Item(i);
                 if(v->connectedPlayer->get_userId() == playerId)

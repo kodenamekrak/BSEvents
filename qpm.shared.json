@@ -1,11 +1,12 @@
 {
   "config": {
+    "version": "0.1.0",
     "sharedDir": "shared",
     "dependenciesDir": "extern",
     "info": {
       "name": "BSEvents",
       "id": "bs-events",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "url": null,
       "additionalData": {
         "overrideSoName": "libbs-events.so",
@@ -42,7 +43,7 @@
     "dependencies": [
       {
         "id": "beatsaber-hook",
-        "versionRange": "^3.14.0",
+        "versionRange": "^5.0.0",
         "additionalData": {
           "extraFiles": [
             "src/inline-hook"
@@ -50,83 +51,103 @@
         }
       },
       {
-        "id": "modloader",
-        "versionRange": "=1.2.3",
-        "additionalData": {}
-      },
-      {
-        "id": "codegen",
-        "versionRange": "^0.33.0",
+        "id": "bs-cordl",
+        "versionRange": "^3402.1.2",
         "additionalData": {}
       },
       {
         "id": "custom-types",
-        "versionRange": "<=0.15.24",
+        "versionRange": "^0.16.18",
         "additionalData": {}
+      },
+      {
+        "id": "scotland2",
+        "versionRange": "^0.1.4",
+        "additionalData": {
+          "includeQmod": false
+        }
       }
     ]
   },
   "restoredDependencies": [
     {
       "dependency": {
-        "id": "modloader",
-        "versionRange": "=1.2.3",
+        "id": "bs-cordl",
+        "versionRange": "=3402.1.2",
         "additionalData": {
-          "soLink": "https://github.com/sc2ad/QuestLoader/releases/download/v1.2.3/libmodloader64.so",
-          "overrideSoName": "libmodloader.so",
-          "branchName": "version-v1.2.3"
+          "headersOnly": true,
+          "branchName": "version/v3402_1_2",
+          "compileOptions": {
+            "includePaths": [
+              "include"
+            ],
+            "cppFeatures": [],
+            "cppFlags": [
+              "-DNEED_UNSAFE_CSHARP",
+              "-fdeclspec",
+              "-DUNITY_2021",
+              "-DHAS_CODEGEN"
+            ]
+          }
         }
       },
-      "version": "1.2.3"
+      "version": "3402.1.2"
     },
     {
       "dependency": {
         "id": "libil2cpp",
-        "versionRange": "=0.2.3",
+        "versionRange": "=0.3.1",
         "additionalData": {
           "headersOnly": true
         }
       },
-      "version": "0.2.3"
+      "version": "0.3.1"
     },
     {
       "dependency": {
         "id": "beatsaber-hook",
-        "versionRange": "=3.14.0",
+        "versionRange": "=5.0.9",
         "additionalData": {
-          "soLink": "https://github.com/sc2ad/beatsaber-hook/releases/download/v3.14.0/libbeatsaber-hook_3_14_0.so",
-          "debugSoLink": "https://github.com/sc2ad/beatsaber-hook/releases/download/v3.14.0/debug_libbeatsaber-hook_3_14_0.so",
-          "branchName": "version-v3.14.0"
+          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.0.9/libbeatsaber-hook_5_0_9.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.0.9/debug_libbeatsaber-hook_5_0_9.so",
+          "branchName": "version/v5_0_9",
+          "cmake": true
         }
       },
-      "version": "3.14.0"
+      "version": "5.0.9"
     },
     {
       "dependency": {
         "id": "custom-types",
-        "versionRange": "=0.15.24",
+        "versionRange": "=0.16.18",
         "additionalData": {
-          "soLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.24/libcustom-types.so",
-          "debugSoLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.24/debug_libcustom-types.so",
+          "soLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.16.18/libcustom-types.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.16.18/debug_libcustom-types.so",
           "overrideSoName": "libcustom-types.so",
-          "modLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.24/CustomTypes.qmod",
-          "branchName": "version-v0.15.24"
+          "modLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.16.18/CustomTypes.qmod",
+          "branchName": "version/v0_16_18",
+          "compileOptions": {
+            "cppFlags": [
+              "-Wno-invalid-offsetof"
+            ]
+          },
+          "cmake": true
         }
       },
-      "version": "0.15.24"
+      "version": "0.16.18"
     },
     {
       "dependency": {
-        "id": "codegen",
-        "versionRange": "=0.33.0",
+        "id": "scotland2",
+        "versionRange": "=0.1.4",
         "additionalData": {
-          "soLink": "https://github.com/sc2ad/BeatSaber-Quest-Codegen/releases/download/v0.33.0/libcodegen.so",
-          "overrideSoName": "libcodegen.so",
-          "modLink": "https://github.com/sc2ad/BeatSaber-Quest-Codegen/releases/download/v0.33.0/Codegen.qmod",
-          "branchName": "version-v0.33.0"
+          "soLink": "https://github.com/sc2ad/scotland2/releases/download/v0.1.4/libsl2.so",
+          "debugSoLink": "https://github.com/sc2ad/scotland2/releases/download/v0.1.4/debug_libsl2.so",
+          "overrideSoName": "libsl2.so",
+          "branchName": "version/v0_1_4"
         }
       },
-      "version": "0.33.0"
+      "version": "0.1.4"
     }
   ]
 }
