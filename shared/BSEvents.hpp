@@ -6,13 +6,13 @@
 
 #include "GlobalNamespace/ScenesTransitionSetupDataSO.hpp"
 #include "GlobalNamespace/StandardLevelDetailViewController.hpp"
-#include "GlobalNamespace/IDifficultyBeatmap.hpp"
+#include "GlobalNamespace/BeatmapKey.hpp"
 #include "GlobalNamespace/BeatmapCharacteristicSegmentedControlController.hpp"
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
 #include "GlobalNamespace/LevelSelectionNavigationController.hpp"
-#include "GlobalNamespace/IBeatmapLevelPack.hpp"
+#include "GlobalNamespace/BeatmapLevelPack.hpp"
+#include "GlobalNamespace/BeatmapLevel.hpp"
 #include "GlobalNamespace/LevelCollectionViewController.hpp"
-#include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
 #include "GlobalNamespace/LevelCompletionResults.hpp"
 #include "GlobalNamespace/NoteController.hpp"
@@ -20,62 +20,60 @@
 #include "GlobalNamespace/SaberType.hpp"
 #include "GlobalNamespace/DisconnectedReason.hpp"
 
-namespace BSEvents {
+#define BSEVENTS_EXPORT __attribute__((visibility("default")))
 
-    enum class LevelType;
+namespace BSEvents {
 
     // Installs event hooks
     // This MUST be called otherwise events will not be called
-    void Init();
+    BSEVENTS_EXPORT void Init();
 
-    std::optional<LevelType> get_currentLevelType();
+    BSEVENTS_EXPORT std::optional<LevelType> get_currentLevelType();
 
-    extern UnorderedEventCallback<> softRestart;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> softRestart;
 
-    extern UnorderedEventCallback<> menuSceneActive;
-    extern UnorderedEventCallback<> menuSceneLoaded;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> menuSceneActive;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> menuSceneLoaded;
 
     // Called when menu scene is loaded fresh (firstActivation)
-    extern UnorderedEventCallback<GlobalNamespace::ScenesTransitionSetupDataSO*> earlyMenuSceneLoadedFresh;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::ScenesTransitionSetupDataSO*> earlyMenuSceneLoadedFresh;
     // Called when menu scene is loaded fresh (firstActivation)
-    extern UnorderedEventCallback<GlobalNamespace::ScenesTransitionSetupDataSO*> lateMenuSceneLoadedFresh;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::ScenesTransitionSetupDataSO*> lateMenuSceneLoadedFresh;
 
-    extern UnorderedEventCallback<> gameSceneActive;
-    extern UnorderedEventCallback<> gameSceneLoaded;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> gameSceneActive;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> gameSceneLoaded;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::StandardLevelDetailViewController*, GlobalNamespace::BeatmapKey> difficultySelected;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::BeatmapCharacteristicSegmentedControlController*, GlobalNamespace::BeatmapCharacteristicSO*> characteristicSelected;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::LevelSelectionNavigationController*, GlobalNamespace::BeatmapLevelPack*> levelPackSelected;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::LevelCollectionViewController*, GlobalNamespace::BeatmapLevel*> levelSelected;
 
-    extern UnorderedEventCallback<GlobalNamespace::StandardLevelDetailViewController*, GlobalNamespace::IDifficultyBeatmap*> difficultySelected;
-    extern UnorderedEventCallback<GlobalNamespace::BeatmapCharacteristicSegmentedControlController*, GlobalNamespace::BeatmapCharacteristicSO*> characteristicSelected;
-    extern UnorderedEventCallback<GlobalNamespace::LevelSelectionNavigationController*, GlobalNamespace::IBeatmapLevelPack*> levelPackSelected;
-    extern UnorderedEventCallback<GlobalNamespace::LevelCollectionViewController*, GlobalNamespace::IPreviewBeatmapLevel*> levelSelected;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> songPaused;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> songUnpaused;
 
+    extern BSEVENTS_EXPORT UnorderedEventCallback<BSEvents::LevelFinishedEventArgs> levelFinished;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelCleared;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelQuit;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelFailed;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelRestarted;
 
-    extern UnorderedEventCallback<> songPaused;
-    extern UnorderedEventCallback<> songUnpaused;
-
-    extern UnorderedEventCallback<BSEvents::LevelFinishedEventArgs> levelFinished;
-    extern UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelCleared;
-    extern UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelQuit;
-    extern UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelFailed;
-    extern UnorderedEventCallback<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO*, GlobalNamespace::LevelCompletionResults*> levelRestarted;
-
-    extern UnorderedEventCallback<GlobalNamespace::NoteController*, GlobalNamespace::NoteCutInfo*> noteWasCut;
-    extern UnorderedEventCallback<GlobalNamespace::NoteController*> noteWasMissed;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::NoteController*, GlobalNamespace::NoteCutInfo*> noteWasCut;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::NoteController*> noteWasMissed;
 
     // Args: multiplier, progress
-    extern UnorderedEventCallback<int, float> multiplierDidChange;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<int, float> multiplierDidChange;
     // Args: multiplier
-    extern UnorderedEventCallback<int> multiplierDidIncrease;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<int> multiplierDidIncrease;
     // Args: combo
-    extern UnorderedEventCallback<int> comboDidChange;
-    extern UnorderedEventCallback<> comboDidBreak;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<int> comboDidChange;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> comboDidBreak;
     // Args: multipliedScore, modifiedScore
-    extern UnorderedEventCallback<int, int> scoreDidChange;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<int, int> scoreDidChange;
     // Args: Energy
-    extern UnorderedEventCallback<float> energyDidChange;
-    extern UnorderedEventCallback<> energyReachedZero;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<float> energyDidChange;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<> energyReachedZero;
 
-    extern UnorderedEventCallback<GlobalNamespace::SaberType> sabersStartCollide;
-    extern UnorderedEventCallback<GlobalNamespace::SaberType> sabersEndCollide;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::SaberType> sabersStartCollide;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::SaberType> sabersEndCollide;
 
-    extern UnorderedEventCallback<GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO*, GlobalNamespace::DisconnectedReason> multiplayerDidDisconnect;
+    extern BSEVENTS_EXPORT UnorderedEventCallback<GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO*, GlobalNamespace::DisconnectedReason> multiplayerDidDisconnect;
 }

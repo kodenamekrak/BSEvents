@@ -27,9 +27,10 @@ MAKE_HOOK_MATCH(SceneManager_Internal_ActiveSceneChanged, &UnityEngine::SceneMan
     BSEvents::OnSceneManagerActiveSceneChanged(prev, next);
 }
 
-MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void, StandardLevelScenesTransitionSetupDataSO* self, StringW gameMode, ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::GlobalNamespace::OverrideEnvironmentSettings* overrideEnvironmentSettings, ::GlobalNamespace::ColorScheme* overrideColorScheme, GlobalNamespace::ColorScheme* beatmapOverrideColorScheme, ::GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::GlobalNamespace::PracticeSettings* practiceSettings, ::StringW backButtonText, bool useTestNoteCutSoundEffects, bool startPaused, ::GlobalNamespace::BeatmapDataCache* beatmapDataCache, System::Nullable_1<::GlobalNamespace::RecordingToolManager::SetupData> recordingToolData)
+MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, static_cast<void(StandardLevelScenesTransitionSetupDataSO::*)(StringW, ::GlobalNamespace::IBeatmapLevelData*, ByRef<::GlobalNamespace::BeatmapKey>, GlobalNamespace::BeatmapLevel*, ::GlobalNamespace::OverrideEnvironmentSettings*, GlobalNamespace::ColorScheme*, ::GlobalNamespace::ColorScheme*, GlobalNamespace::GameplayModifiers*, ::GlobalNamespace::PlayerSpecificSettings*, GlobalNamespace::PracticeSettings*, ::GlobalNamespace::EnvironmentsListModel*, GlobalNamespace::AudioClipAsyncLoader*, ::GlobalNamespace::BeatmapDataLoader*, StringW, bool, bool, System::Nullable_1<::GlobalNamespace::RecordingToolManager::SetupData>)>(&StandardLevelScenesTransitionSetupDataSO::Init), 
+    void, StandardLevelScenesTransitionSetupDataSO* self, StringW gameMode, ::GlobalNamespace::IBeatmapLevelData* beatmapLevelData, ByRef<::GlobalNamespace::BeatmapKey> beatmapKey, GlobalNamespace::BeatmapLevel* beatmapLevel, ::GlobalNamespace::OverrideEnvironmentSettings* overrideEnvironmentSettings, GlobalNamespace::ColorScheme* overrideColorScheme, GlobalNamespace::ColorScheme* beatmapOverrideColorScheme, GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, GlobalNamespace::PracticeSettings* practiceSettings, ::GlobalNamespace::EnvironmentsListModel* environmentsListModel, GlobalNamespace::AudioClipAsyncLoader* audioClipAsyncLoader, ::GlobalNamespace::BeatmapDataLoader* beatmapDataLoader, StringW backButtonText, bool useTestNoteCutSoundEffects, bool startPaused, System::Nullable_1<::GlobalNamespace::__RecordingToolManager__SetupData> recordingToolData)
 {
-    StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, beatmapOverrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects, startPaused, beatmapDataCache, recordingToolData);
+    StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, beatmapLevelData, beatmapKey, beatmapLevel, overrideEnvironmentSettings, overrideColorScheme, beatmapOverrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, environmentsListModel, audioClipAsyncLoader, beatmapDataLoader, backButtonText, useTestNoteCutSoundEffects, startPaused, recordingToolData);
     currentLevelType = BSEvents::LevelType::SoloParty;
 
     if(standardLevelScenesDelegate.isHandleValid())
@@ -39,9 +40,9 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
     self->add_didFinishEvent(standardLevelScenesDelegate.ptr());
 }
 
-MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &MultiplayerLevelScenesTransitionSetupDataSO::Init, void, MultiplayerLevelScenesTransitionSetupDataSO* self, StringW gameMode, ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::GlobalNamespace::BeatmapDifficulty beatmapDifficulty, ::GlobalNamespace::BeatmapCharacteristicSO* beatmapCharacteristic, ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, ::GlobalNamespace::ColorScheme* overrideColorScheme, ::GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::GlobalNamespace::PracticeSettings* practiceSettings, bool useTestNoteCutSoundEffects)
+MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &MultiplayerLevelScenesTransitionSetupDataSO::Init, void, MultiplayerLevelScenesTransitionSetupDataSO* self, StringW gameMode, ByRef<::GlobalNamespace::BeatmapKey> beatmapKey, ::GlobalNamespace::BeatmapLevel* beatmapLevel, GlobalNamespace::IBeatmapLevelData* beatmapLevelData, ::GlobalNamespace::ColorScheme* overrideColorScheme, GlobalNamespace::GameplayModifiers* gameplayModifiers, GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::GlobalNamespace::PracticeSettings* practiceSettings, GlobalNamespace::AudioClipAsyncLoader* audioClipAsyncLoader, ::GlobalNamespace::BeatmapDataLoader* beatmapDataLoader, bool useTestNoteCutSoundEffects)
 {
-    MultiplayerLevelScenesTransitionSetupDataSO_Init(self, gameMode, previewBeatmapLevel, beatmapDifficulty, beatmapCharacteristic, difficultyBeatmap, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, useTestNoteCutSoundEffects);
+    MultiplayerLevelScenesTransitionSetupDataSO_Init(self, gameMode, beatmapKey, beatmapLevel, beatmapLevelData, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, audioClipAsyncLoader, beatmapDataLoader, useTestNoteCutSoundEffects);
     currentLevelType = BSEvents::LevelType::Multiplayer;
     
     if(multiplayerLevelScenesDelegate.isHandleValid())
@@ -58,9 +59,10 @@ MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &MultiplayerLe
     self->add_didDisconnectEvent(multiplayerDisconnectedDelegate.ptr());
 }
 
-MAKE_HOOK_MATCH(MissionLevelScenesTransitionSetupDataSO_Init, &MissionLevelScenesTransitionSetupDataSO::Init, void, MissionLevelScenesTransitionSetupDataSO* self, StringW missionId, ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::ArrayW<::GlobalNamespace::MissionObjective*> missionObjectives, ::GlobalNamespace::ColorScheme* overrideColorScheme, ::GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::StringW backButtonText)
+MAKE_HOOK_MATCH(MissionLevelScenesTransitionSetupDataSO_Init, static_cast<void(MissionLevelScenesTransitionSetupDataSO::*)(StringW , ::GlobalNamespace::IBeatmapLevelData* , ByRef<::GlobalNamespace::BeatmapKey> , ::GlobalNamespace::BeatmapLevel*, ArrayW<::GlobalNamespace::MissionObjective*, ::Array<::GlobalNamespace::MissionObjective*>*> , ::GlobalNamespace::ColorScheme* , GlobalNamespace::GameplayModifiers* , GlobalNamespace::PlayerSpecificSettings* , GlobalNamespace::EnvironmentsListModel* , GlobalNamespace::AudioClipAsyncLoader*, ::GlobalNamespace::BeatmapDataLoader*, StringW)>(&MissionLevelScenesTransitionSetupDataSO::Init), 
+    void, MissionLevelScenesTransitionSetupDataSO* self, StringW missionId, ::GlobalNamespace::IBeatmapLevelData* beatmapLevelData, ByRef<::GlobalNamespace::BeatmapKey> beatmapKey, ::GlobalNamespace::BeatmapLevel* beatmapLevel, ArrayW<::GlobalNamespace::MissionObjective*, ::Array<::GlobalNamespace::MissionObjective*>*> missionObjectives, ::GlobalNamespace::ColorScheme* overrideColorScheme, GlobalNamespace::GameplayModifiers* gameplayModifiers, ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::GlobalNamespace::EnvironmentsListModel* environmentsListModel, GlobalNamespace::AudioClipAsyncLoader* audioClipAsyncLoader, ::GlobalNamespace::BeatmapDataLoader* beatmapDataLoader, ::StringW backButtonText)
 {
-    MissionLevelScenesTransitionSetupDataSO_Init(self, missionId, difficultyBeatmap, previewBeatmapLevel, missionObjectives, overrideColorScheme, gameplayModifiers, playerSpecificSettings, backButtonText);
+    MissionLevelScenesTransitionSetupDataSO_Init(self, missionId, beatmapLevelData, beatmapKey, beatmapLevel, missionObjectives, overrideColorScheme, gameplayModifiers, playerSpecificSettings, environmentsListModel, audioClipAsyncLoader, beatmapDataLoader, backButtonText);
     currentLevelType = BSEvents::LevelType::Campaign;
     
     if(missionLevelScenesDelegate.isHandleValid())
@@ -99,14 +101,14 @@ namespace BSEvents
         if(!initialised)
         {
             il2cpp_functions::Init();
-            getLogger().info("Installing Hooks...");
-            INSTALL_HOOK(getLogger(), SceneManager_Internal_ActiveSceneChanged);
-            INSTALL_HOOK(getLogger(), StandardLevelScenesTransitionSetupDataSO_Init);
-            INSTALL_HOOK(getLogger(), MultiplayerLevelScenesTransitionSetupDataSO_Init);
-            INSTALL_HOOK(getLogger(), MissionLevelScenesTransitionSetupDataSO_Init);
-            INSTALL_HOOK(getLogger(), TutorialScenesTransitionSetupDataSO_Init);
-            INSTALL_HOOK(getLogger(), MenuTransitionsHelper_RestartGame);
-            getLogger().info("Installed Hooks!");
+            logger.info("Installing Hooks...");
+            INSTALL_HOOK(logger, SceneManager_Internal_ActiveSceneChanged);
+            INSTALL_HOOK(logger, StandardLevelScenesTransitionSetupDataSO_Init);
+            INSTALL_HOOK(logger, MultiplayerLevelScenesTransitionSetupDataSO_Init);
+            INSTALL_HOOK(logger, MissionLevelScenesTransitionSetupDataSO_Init);
+            INSTALL_HOOK(logger, TutorialScenesTransitionSetupDataSO_Init);
+            INSTALL_HOOK(logger, MenuTransitionsHelper_RestartGame);
+            logger.info("Installed Hooks!");
             initialised = true;
         }
     }
@@ -125,10 +127,10 @@ namespace BSEvents
     UnorderedEventCallback<> gameSceneActive;
     UnorderedEventCallback<> gameSceneLoaded;
 
-    UnorderedEventCallback<GlobalNamespace::StandardLevelDetailViewController *, GlobalNamespace::IDifficultyBeatmap *> difficultySelected;
+    UnorderedEventCallback<GlobalNamespace::StandardLevelDetailViewController *, GlobalNamespace::BeatmapKey> difficultySelected;
     UnorderedEventCallback<GlobalNamespace::BeatmapCharacteristicSegmentedControlController *, GlobalNamespace::BeatmapCharacteristicSO *> characteristicSelected;
-    UnorderedEventCallback<GlobalNamespace::LevelSelectionNavigationController *, GlobalNamespace::IBeatmapLevelPack *> levelPackSelected;
-    UnorderedEventCallback<GlobalNamespace::LevelCollectionViewController *, GlobalNamespace::IPreviewBeatmapLevel *> levelSelected;
+    UnorderedEventCallback<GlobalNamespace::LevelSelectionNavigationController *, GlobalNamespace::BeatmapLevelPack *> levelPackSelected;
+    UnorderedEventCallback<GlobalNamespace::LevelCollectionViewController *, GlobalNamespace::BeatmapLevel *> levelSelected;
 
     UnorderedEventCallback<> songPaused;
     UnorderedEventCallback<> songUnpaused;
@@ -154,10 +156,4 @@ namespace BSEvents
     UnorderedEventCallback<GlobalNamespace::SaberType> sabersEndCollide;
 
     UnorderedEventCallback<GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO*, GlobalNamespace::DisconnectedReason> multiplayerDidDisconnect;
-}
-
-Logger &getLogger()
-{
-    static Logger *logger = new Logger(modInfo, {false, true});
-    return *logger;
 }

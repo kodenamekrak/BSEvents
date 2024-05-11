@@ -33,10 +33,10 @@ bool lastMainSceneWasNotMenu;
 
 #define INVOKE(event, ...) \
 try { \
-    getLogger().info("Invoking event '%s'", #event); \
+    logger.info("Invoking event '{}'", #event); \
     BSEvents::event.invoke(__VA_ARGS__); \
 } catch(std::exception& err) { \
-    getLogger().error("Error while invoking event: %s", err.what()); \
+    logger.error("Error while invoking event: {}", err.what()); \
 }
 
 namespace BSEvents {
@@ -146,19 +146,19 @@ namespace BSEvents {
         gameScenesManager->remove_transitionDidFinishEvent(menuSceneLoadedFreshDelegate.ptr());
 
         auto levelDetailViewController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::StandardLevelDetailViewController*>().front_or_default();
-        levelDetailViewController->add_didChangeDifficultyBeatmapEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::StandardLevelDetailViewController> viewController, GlobalNamespace::IDifficultyBeatmap*difficultyBeatmap)
-        { INVOKE(difficultySelected, viewController, difficultyBeatmap); })));
+        levelDetailViewController->add_didChangeDifficultyBeatmapEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::StandardLevelDetailViewController> viewController)
+        { INVOKE(difficultySelected, viewController, viewController->beatmapKey); })));
 
         auto segmentedControlController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapCharacteristicSegmentedControlController*>().front_or_default();
         segmentedControlController->add_didSelectBeatmapCharacteristicEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::BeatmapCharacteristicSegmentedControlController> controller, UnityW<GlobalNamespace::BeatmapCharacteristicSO> characteristic)
         { INVOKE(characteristicSelected, controller, characteristic); })));
 
         auto navigationController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::LevelSelectionNavigationController*>().front_or_default();
-        navigationController->add_didSelectLevelPackEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::LevelSelectionNavigationController> controller, GlobalNamespace::IBeatmapLevelPack * levelPack)
+        navigationController->add_didSelectLevelPackEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::LevelSelectionNavigationController> controller, GlobalNamespace::BeatmapLevelPack * levelPack)
         { INVOKE(levelPackSelected, controller, levelPack); })));
 
         auto collectionViewController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::LevelCollectionViewController*>().front_or_default();
-        collectionViewController->add_didSelectLevelEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::LevelCollectionViewController> controller, GlobalNamespace::IPreviewBeatmapLevel* level)
+        collectionViewController->add_didSelectLevelEvent(DelegateHelper::CreateDelegate(std::function([](UnityW<GlobalNamespace::LevelCollectionViewController> controller, GlobalNamespace::BeatmapLevel* level)
         { INVOKE(levelSelected, controller, level); })));
 
         INVOKE(earlyMenuSceneLoadedFresh, setupData);

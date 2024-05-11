@@ -8,5 +8,5 @@
 #include "beatsaber-hook/shared/utils/logging.hpp"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
-// Define these functions here so that we can easily read configuration and log information from other files
-Logger& getLogger();
+#include "paper/shared/logger.hpp"
+static constexpr auto logger = Paper::ConstLoggerContext("BS-Events");

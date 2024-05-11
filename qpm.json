@@ -5,7 +5,7 @@
   "info": {
     "name": "BSEvents",
     "id": "bs-events",
-    "version": "0.0.3",
+    "version": "0.0.5",
     "url": null,
     "additionalData": {
       "overrideSoName": "libbs-events.so",
@@ -44,20 +44,8 @@
       "id": "beatsaber-hook",
       "versionRange": "^5.0.0",
       "additionalData": {
-        "extraFiles": [
-          "src/inline-hook"
-        ]
+       
       }
-    },
-    {
-      "id": "bs-cordl",
-      "versionRange": "^3402.1.2",
-      "additionalData": {}
-    },
-    {
-      "id": "custom-types",
-      "versionRange": "^0.16.18",
-      "additionalData": {}
     },
     {
       "id": "scotland2",
@@ -65,6 +53,21 @@
       "additionalData": {
         "includeQmod": false
       }
+    },
+    {
+      "id": "bs-cordl",
+      "versionRange": "^3500.0.0",
+      "additionalData": {}
+    },
+    {
+      "id": "custom-types",
+      "versionRange": "^0.17.3",
+      "additionalData": {}
+    },
+    {
+      "id": "paper",
+      "versionRange": "^3.6.3",
+      "additionalData": {}
     }
   ]
 }
