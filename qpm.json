@@ -5,8 +5,8 @@
   "info": {
     "name": "BSEvents",
     "id": "bs-events",
-    "version": "0.0.5",
-    "url": null,
+    "version": "1.0.0",
+    "url": "https://github.com/kodenamekrak/BSEvents",
     "additionalData": {
       "overrideSoName": "libbs-events.so",
       "cmake": true
@@ -25,7 +25,7 @@
       ],
       "qmod": [
         "pwsh ./scripts/build.ps1 -clean",
-        "qpm qmod build --isLibrary true",
+        "qpm qmod manifest",
         "pwsh ./scripts/createqmod.ps1"
       ],
       "restart": [
