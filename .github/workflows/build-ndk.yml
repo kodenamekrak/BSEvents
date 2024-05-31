@@ -17,7 +17,7 @@ on:
       - "main"
 
 env:
-  module_id: bsevents
+  module_id: bs-events
   qmod_name: BSEvents
   cache-name: bsevents_cache
 
