@@ -19,7 +19,7 @@
 
 #include "Zenject/DiContainer.hpp"
 
-GlobalNamespace::GameScenesManager* gameScenesManager;
+UnityW<GlobalNamespace::GameScenesManager> gameScenesManager;
 
 using SceneLoadedAction = System::Action_2<UnityW<GlobalNamespace::ScenesTransitionSetupDataSO>, Zenject::DiContainer *>;
 using SceneTransitionFinishedAction = System::Action_2<UnityW<GlobalNamespace::StandardLevelScenesTransitionSetupDataSO>, GlobalNamespace::LevelCompletionResults *>;
@@ -192,7 +192,7 @@ namespace BSEvents {
             gameScenesManager = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::GameScenesManager*>().front_or_default();
             INVOKE(menuSceneActive);
  
-            if(gameScenesManager && gameScenesManager->m_CachedPtr)
+            if(gameScenesManager)
             {
                 if(prev.get_name() == "EmptyTransition" && !lastMainSceneWasNotMenu)
                 {
