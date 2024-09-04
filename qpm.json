@@ -37,22 +37,16 @@
       "tomb": [
         "pwsh ./scripts/pull-tombstone.ps1"
       ]
-    }
+    },
+    "qmodIncludeDirs": [],
+    "qmodIncludeFiles": [],
+    "qmodOutput": null
   },
   "dependencies": [
     {
       "id": "beatsaber-hook",
       "versionRange": "^5.0.0",
-      "additionalData": {
-       
-      }
-    },
-    {
-      "id": "scotland2",
-      "versionRange": "^0.1.4",
-      "additionalData": {
-        "includeQmod": false
-      }
+      "additionalData": {}
     },
     {
       "id": "bs-cordl",
